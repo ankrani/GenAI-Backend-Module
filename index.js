@@ -6,8 +6,7 @@ const path = require('path');
 const User = require('./models/User');
 const app = express();
 const port = 5000;
-const sendmail = require('sendmail')();
-
+const nodemailer = require("nodemailer");
 
 
 const stripe = require('stripe')('sk_test_51I58GvJWvOCl4irEXh0wXUHgEAImIjWRy4ylnvVEWB5UpO1r9nzMhMVVR8YYOHtQNUNoSU5yBSRFwxeVJc56pbYz00PUHd5fa2');
@@ -61,16 +60,26 @@ app.get('/getuser', async(req, res) => {
     if (!user) {
       return res.status(404).send('User not found');
     }
-    
-    sendmail({
-        from: 'no-reply@yourdomain.com',
-        to: 'saikatmukherjee108@gmail.com',
-        subject: 'test sendmail',
-        html: 'Mail of test sendmail ',
-    }, function(err, reply) {
-        console.log(err && err.stack);
-        console.dir(reply);
+    const transporter = await nodemailer.createTransport({
+        host: 'smtp.ethereal.email',
+        port: 587,
+        auth: {
+            user: 'spencer.konopelski25@ethereal.email',
+            pass: 'fHp8b4vVRZqW9cpa3e'
+        }
     });
+
+
+    const info = await transporter.sendMail({
+        from: '"Team Cartiofy 👻" <spencer.konopelski25@ethereal.email>', // sender address
+        to: emailQuery, // list of receivers
+        subject: "OTP for log in ✔", // Subject line
+        text: `Your OTP is ${user.otp}`, // plain text body
+        html: `<b>Your OTP is ${user.otp}</b>`, // html body
+    });
+    console.log("Message sent: %s", info.messageId);
+    
+   
     res.send(user);
     
 })
@@ -110,3 +119,6 @@ mongoose.connect(
 
 
 
+module.exports = {
+    app
+}
