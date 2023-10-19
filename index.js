@@ -6,6 +6,9 @@ const path = require('path');
 const User = require('./models/User');
 const app = express();
 const port = 5000;
+const sendmail = require('sendmail')();
+
+
 
 const stripe = require('stripe')('sk_test_51I58GvJWvOCl4irEXh0wXUHgEAImIjWRy4ylnvVEWB5UpO1r9nzMhMVVR8YYOHtQNUNoSU5yBSRFwxeVJc56pbYz00PUHd5fa2');
 
@@ -37,6 +40,8 @@ app.post('/register', (req, res) => {
 })
 
 
+
+
 app.get('/findall', (req, res) => {
     User.find()
     .then(data =>{
@@ -49,13 +54,24 @@ app.get('/findall', (req, res) => {
 app.get('/getuser', async(req, res) => {
     const emailQuery = req.query.email;
     //console.log('>>>>>>',emailQuery)
-    const user = await User.findOne({ "email" : emailQuery });
-    //console.log('>>>>>',user)
+    const user = await User.findOne({ "email": emailQuery });
+
+    
+    console.log('>>>>>',user)
     if (!user) {
       return res.status(404).send('User not found');
     }
+    
+    sendmail({
+        from: 'no-reply@yourdomain.com',
+        to: 'saikatmukherjee108@gmail.com',
+        subject: 'test sendmail',
+        html: 'Mail of test sendmail ',
+    }, function(err, reply) {
+        console.log(err && err.stack);
+        console.dir(reply);
+    });
     res.send(user);
-  
     
 })
 
